@@ -13,10 +13,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.midterm.ui.theme.MidtermTheme
 
 class MainActivity : ComponentActivity() {
@@ -25,7 +28,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MidtermTheme {
-                    ButtonScreen()
+                    CounterScreenParent()
                 }
             }
         }
@@ -63,3 +66,44 @@ fun ButtonScreenPreview() {
 }
 
 /*Q2 ViewModel & Unidirectional DataFlow */
+// FIXING THE FOLLOWING:
+/*
+@Composable
+fun CounterScreen() {
+    var count by remember { mutableStateOf(0) }
+    Column {
+        Text("Count: $count")
+        Button(onClick = { count++ }) {
+            Text("Increment")
+        }
+    }
+}
+ */
+class CounterViewModel : ViewModel() {
+    var count by mutableStateOf(0)
+    // ViewModel function
+    fun countHandler(){
+        count += 1
+    }
+}
+
+@Composable
+fun CounterScreen(count: Int, increment: () -> Unit) {
+    Column {
+        Text("Count: $count")
+        Button(
+            onClick = { increment() }
+        ) {
+            Text("Increment")
+        }
+    }
+}
+
+// State hoisting view model to parent composable then passing params & functions to CounterScreen
+@Composable
+fun CounterScreenParent(viewModel: CounterViewModel = viewModel()) {
+    CounterScreen(
+        count = viewModel.count,
+        increment = { viewModel.countHandler() }
+    )
+}
